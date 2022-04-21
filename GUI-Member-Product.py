@@ -14,7 +14,8 @@ from productdb import *
 # db.View_member()
 #############FUNCTION##############
 from menufunction import *
-addmember = AddMember()
+addproduct = AddProduct()
+product_icon = ProductIcon()
 #############CSV##############
 import csv
 from datetime import datetime
@@ -64,7 +65,16 @@ menubar.add_cascade(label='Member',menu=membermenu)
 productmenu = Menu(menubar,tearoff=0)
 menubar.add_cascade(label='Product',menu=productmenu)
 
-productmenu.add_command(label='Add Product',command=addmember.command)
+productmenu.add_command(label='Add Product', command=addproduct.command)
+
+# -----------------------------------------
+# Setting
+
+settingmenu = Menu(menubar,tearoff=0)
+menubar.add_cascade(label='Setting',menu=settingmenu)
+
+settingmenu.add_command(label='Product Icon', command=product_icon.command)
+
 
 # -----------------------------------------
 # Help Menu
@@ -95,8 +105,7 @@ helpmenu.add_command(label='About',command=About)
 Tab = ttk.Notebook(GUI)
 Tab.pack(fill=BOTH,expand=1)
 
-T1 = Frame(Tab)
-T2 = Frame(Tab)
+
 T3 = Frame(Tab)
 T4 = Frame(Tab)
 
@@ -105,86 +114,9 @@ icon_tab2 = PhotoImage(file='tab2.png')
 icon_tab3 = PhotoImage(file='tab3.png')
 icon_tab4 = PhotoImage(file='tab4.png')
 
-Tab.add(T1, text='กุ้ง',image=icon_tab1,compound='left')
-Tab.add(T2, text='wiki',image=icon_tab2,compound='left')
+
 Tab.add(T3, text='CAFE',image=icon_tab3,compound='left')
 Tab.add(T4, text='Member',image=icon_tab4,compound='left')
-
-############TAB 1 - กุ้ง############
-
-L1 = Label(T1,text='กรอกจำนวนกุ้ง (กิโลกรัม)',font=('Angsana New',25))
-L1.pack()
-
-v_kilo = StringVar() #ตัวแปรพิเศษเอาไว้เก็บค่า
-
-E1 = ttk.Entry(T1, textvariable= v_kilo, width=10,justify='right',font=('impact',30))
-E1.pack(pady=20)
-
-E1.focus()
-
-def Calc(event=None):
-    print('กำลังคำนวณ...กรุณารอสักครู่')
-    kilo = float(v_kilo.get()) # .get() ดึงข้อมูลจากตัวแปรที่เป็น StringVar
-    print(kilo * 10)
-    calc_result = kilo * 299
-    date = datetime.now()
-    year = date.year + 543
-    stamp = date.strftime('{}-%m-%d %H:%M:%S'.format(year)) #Thai Year
-    data = [stamp, 'กุ้ง', '{:,.2f}'.format(calc_result)]
-    writetocsv(data)
-    messagebox.showinfo('รวมราคาทั้งหมด','ลูกค้าต้องจ่ายตังค์ทั้งหมด: {:,.2f} บาท (กิโลกรัมละ 299 บาท)'.format(calc_result))
-
-
-B1 = ttk.Button(T1,text='คำนวณราคา',command=Calc)
-B1.pack(ipadx=40,ipady=30)
-
-E1.bind('<Return>',Calc) # ต้องใส่คำว่า event=None ไว้ในฟังชั่นด้วย
-
-############TAB 2 - Wiki ############
-
-FONT1 = ('Angsana New',25)
-
-L2 = Label(T2,text='ค้นหาข้อมูล wikipedia',font=('Angsana New',25))
-L2.pack()
-
-v_search = StringVar() # .get()=ดึงข้อมูล .set('hello') เซ็ตข้อความให้เป็นแบบนั้น
-
-E2 = ttk.Entry(T2, textvariable=v_search, font=FONT1)
-E2.pack(pady=10)
-
-wikipedia.set_lang('th') #ทำให้เป็นภาษาไทย
-
-v_link = StringVar()
-
-def Search():
-    try:
-        search = v_search.get() #ดึงข้อความจากช่องกรอกมา
-        # text = wikipedia.summary(search)
-        text = wikipedia.page(search)
-        print(text)
-        v_result.set(text.content[:1000])
-        print('LINK:',text.url)
-        v_link.set(text.url)
-    except:
-        v_result.set('ไม่มีข้อมูล กรุณาค้นหาใหม่')
-
-    # เพิ่มฟังชั่นสำหรับเด้งไปอ่านบทความฉบับเต็มในเว็บบราวเซอร์
-
-B2 = ttk.Button(T2,text='Search',image=icon_tab2,compound='left',command=Search)
-B2.pack()
-
-import webbrowser
-
-def readmore():
-    webbrowser.open(v_link.get())
-
-B3 = ttk.Button(T2,text='อ่านต่อ',command=readmore)
-B3.place(x=800,y=50)
-
-v_result = StringVar()
-v_result.set('--------Result--------')
-result = Label(T2,textvariable=v_result,wraplength=550, font=(None,15))
-result.pack()
 
 ############TAB 3 - Coffee ############
 
