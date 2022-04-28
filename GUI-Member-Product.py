@@ -26,7 +26,7 @@ def writetocsv(data, filename='data.csv'):
 
 #############GUI##############
 GUI = Tk()
-GUI.title('โปรแกรมจัดการ layout')
+GUI.title('โปรแกรม AMA SHOP')
 GUI.iconbitmap('loong.ico')
 
 W = 1200
