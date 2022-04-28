@@ -194,7 +194,7 @@ for i,(k,v) in enumerate(product.items()):
     B.grid(row=row, column=column)
     column += 1
 
-B.grid_for
+# B.grid_forget
 
 '''
 B = ttk.Button(CF1,text='ลาเต้',image=icon_tab3,compound='top',command=lambda m='latte': AddMenu(m))
