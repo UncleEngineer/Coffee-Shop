@@ -1,7 +1,7 @@
 # GUI-Calculator.py
 from tkinter import *
 from tkinter import ttk, messagebox
-import wikipedia
+
 #############DATABASE##############
 from memberdb import *
 from productdb import *
@@ -130,13 +130,19 @@ CF1.place(x=50,y=100)
 # header = ['No.', 'title', 'quantity','price','total']
 
 allmenu = {}
-
+'''
 product = {'latte':{'name':'ลาเต้','price':30},
            'cappuccino':{'name':'คาปูชิโน','price':35},
            'espresso':{'name':'เอสเปรสโซ่','price':40},
            'greentea':{'name':'ชาเขียว','price':20},
            'icetea':{'name':'ชาเย็น','price':15},
-           'hottea':{'name':'ชาร้อน','price':10},}
+           'hottea':{'name':'ชาร้อน','price':10},
+           'coco':{'name':'โกโก้','price':50},}
+'''
+
+product = product_icon_list()
+print(product)
+
 
 def UpdateTable():
     table.delete(*table.get_children()) # แคลียร์ข้อมูลเก่าในตาราง
@@ -163,6 +169,34 @@ def AddMenu(name='latte'):
 
 
 
+'''
+row = 0        
+column = 0         
+for i,(k,v) in enumerate(product.items()):
+    if column == 3:
+               column = 0
+               row += 1
+    print("B = ttk.Button(CF1,text='{}',image=icon_tab3,compound='top',command=lambda m='{}': AddMenu(m)".format(v['name'],k))
+    print('B.grid(row={},column={})'.format(row,column))
+    column += 1
+    print('--------')
+'''
+
+row = 0
+column = 0
+column_quan = 3 # ปรับค่านี้เพื่อสร้างจำนวนคอลัมน์สินค้า
+for i,(k,v) in enumerate(product.items()):
+    if column == column_quan:
+        column = 0
+        row += 1
+    B = ttk.Button(CF1,text=v['name'],image=icon_tab3,compound='top')
+    B.configure(command=lambda m=k: AddMenu(m))
+    B.grid(row=row, column=column)
+    column += 1
+
+B.grid_for
+
+'''
 B = ttk.Button(CF1,text='ลาเต้',image=icon_tab3,compound='top',command=lambda m='latte': AddMenu(m))
 B.grid(row=0,column=0,ipadx=20,ipady=10)
 B = ttk.Button(CF1,text='คาปูชิโน',image=icon_tab3,compound='top',command=lambda m='cappuccino': AddMenu(m))
@@ -177,7 +211,7 @@ B = ttk.Button(CF1,text='ชาเย็น',image=icon_tab3,compound='top',comm
 B.grid(row=1,column=1,ipadx=20,ipady=10)
 B = ttk.Button(CF1,text='ชาร้อน',image=icon_tab3,compound='top',command=lambda m='hottea': AddMenu(m))
 B.grid(row=1,column=2,ipadx=20,ipady=10)
-
+'''
 
 
 

@@ -41,19 +41,23 @@ def view_product_status(pid):
 def update_product_status(pid,status):
 	# UPDATE
 	with conn:
-		command = 'UPDATE product_status SET status = (?) WHERE ID=(?)'
+		command = 'UPDATE product_status SET status = (?) WHERE product_id=(?)'
 		c.execute(command,([status,pid]))
 	conn.commit()
 	print('updated:',(pid,status))
 
 #################################
 def Insert_product(productid,title,price,image):
+	# ตรวจสอบ productid ที่มีแล้ว ห้ามซ้ำ
 	# CREATE
 	with conn:
 		command = 'INSERT INTO product VALUES (?,?,?,?,?)' # SQL
 		c.execute(command,(None,productid,title,price,image))
 	conn.commit() # SAVE DATABASE
 	print('saved')
+	# add status after insert product
+	find = View_product_single(productid)
+	insert_product_status(find[0],'')
 
 
 def View_product():
@@ -83,13 +87,50 @@ def View_product_single(productid):
 	print(result)
 	return result
 
+'''
+product = {'latte':{'name':'ลาเต้','price':30},
+           'cappuccino':{'name':'คาปูชิโน','price':35},
+           'espresso':{'name':'เอสเปรสโซ่','price':40},
+           'greentea':{'name':'ชาเขียว','price':20},
+           'icetea':{'name':'ชาเย็น','price':15},
+           'hottea':{'name':'ชาร้อน','price':10},
+           'coco':{'name':'โกโก้','price':50},}
+'''
+def product_icon_list():
+	with conn:
+		command = 'SELECT * FROM product'
+		c.execute(command)
+		product = c.fetchall()
+
+	with conn:
+		command = "SELECT * FROM product_status WHERE status = 'show'"
+		c.execute(command)
+		status = c.fetchall()
+
+	result = [] 
+
+	for s in status:
+		for p in product:
+			if s[1] == p[0]:
+				#print(p,s[-1])
+				result.append(p)
+
+	result_dict = {}
+	# print(result)
+	# (1, 'A-1001', 'เอสเพรสโซ่', 25.0, 'C:/Users/Uncle Engineer/Desktop/Live/PythonGUI-10.png')
+	for r in result:
+		result_dict[r[0]] = {'id':r[0],'productid':r[1],'name':r[2],'price':r[3],'icon':r[4]}
+
+	return result_dict
 
 if __name__ == '__main__':
+	x = product_icon_list()
+	print(x)
 	# ฟังชั่นนี้เอาไว้เช็คว่าตอนนี้ไฟล์ที่กำลังรันนี้อยู่ในไฟล์จริงหรือไม่?
 	#Insert_product('CF-1002','เอสเปรสโซ่',45, r'C:\Image\latte.png')
 	# r'/Users/uncleengineer/Desktop/GUI/Image/a.png'
 	# View_product()
 	# View_product_table_icon()
-	insert_product_status(1,'show')
+	# insert_product_status(1,'show')
 	# print(view_product_status(1))
 	
