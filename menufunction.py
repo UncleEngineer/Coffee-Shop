@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import filedialog
 from productdb import *
+import os
+
 
 
 
@@ -111,10 +113,11 @@ class AddProduct:
 		self.v_price = None
 		self.v_imagepath = None
 		self.MGUI = None
+		self.ProductImage = None
 
 	def popup(self):
 		self.MGUI = Toplevel()
-		self.MGUI.geometry('500x600')
+		self.MGUI.geometry('500x700')
 		self.MGUI.title('Add Product')
 
 		self.v_productid = StringVar()
@@ -139,7 +142,9 @@ class AddProduct:
 		E3 = ttk.Entry(self.MGUI,textvariable= self.v_price,font=(None,20))
 		E3.pack(pady=10)
 
-		L = Label(self.MGUI,textvariable=self.v_imagepath).pack()
+		img = PhotoImage(file='default-product.png')
+		self.ProductImage = Label(self.MGUI,textvariable=self.v_imagepath, image=img, compound='top')
+		self.ProductImage.pack()
 
 		Bselect = ttk.Button(self.MGUI, text='เลือกรูปสินค้า ( 50 x 50 px )',command=self.selectfile)
 		Bselect.pack(pady=10)
@@ -156,7 +161,12 @@ class AddProduct:
 				('PNG', '*.png'),
 				('All files', '*.*')
 			)
-		select = filedialog.askopenfilename(title='เลือกไฟล์ภาพ',initialdir='/',filetypes=filetypes)
+		DIR = os.getcwd() #ตำแหน่งโฟลเดอร์โปรแกรม
+		select = filedialog.askopenfilename(title='เลือกไฟล์ภาพ',initialdir=DIR,filetypes=filetypes)
+		img = PhotoImage(file=select)
+		self.ProductImage.configure(image=img)
+		self.ProductImage.image = img # ****
+
 		self.v_imagepath.set(select)
 		self.MGUI.focus_force() # โฟกัสหน้าต่างที่ select
 		self.MGUI.grab_set()

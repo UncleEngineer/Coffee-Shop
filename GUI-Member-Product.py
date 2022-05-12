@@ -26,7 +26,7 @@ def writetocsv(data, filename='data.csv'):
 
 #############GUI##############
 GUI = Tk()
-GUI.title('โปรแกรม AMA SHOP')
+GUI.title('โปรแกรมจัดการ layout')
 GUI.iconbitmap('loong.ico')
 
 W = 1200
@@ -189,8 +189,15 @@ for i,(k,v) in enumerate(product.items()):
     if column == column_quan:
         column = 0
         row += 1
-    B = ttk.Button(CF1,text=v['name'],image=icon_tab3,compound='top')
+
+    print('IMG:', v['icon'])
+    new_icon = PhotoImage(file=v['icon'])
+    B = ttk.Button(CF1,text=v['name'],compound='top')
     B.configure(command=lambda m=k: AddMenu(m))
+
+    B.configure(image=new_icon)
+    B.image = new_icon
+    
     B.grid(row=row, column=column)
     column += 1
 
