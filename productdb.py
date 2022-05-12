@@ -57,7 +57,7 @@ def Insert_product(productid,title,price,image):
 	print('saved')
 	# add status after insert product
 	find = View_product_single(productid)
-	insert_product_status(find[0],'')
+	insert_product_status(find[0],'show') # show icon ทุกครั้งที่มีการแอด
 
 
 def View_product():
