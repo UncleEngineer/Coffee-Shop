@@ -28,6 +28,8 @@ def writetocsv(data, filename='data.csv'):
 GUI = Tk()
 GUI.title('โปรแกรมจัดการ layout')
 GUI.iconbitmap('loong.ico')
+# fullscreen after run
+GUI.state('zoomed')
 
 #######STYLE##########
 style = ttk.Style()
