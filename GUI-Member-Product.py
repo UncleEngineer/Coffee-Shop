@@ -29,6 +29,14 @@ GUI = Tk()
 GUI.title('โปรแกรมจัดการ layout')
 GUI.iconbitmap('loong.ico')
 
+#######STYLE##########
+style = ttk.Style()
+style.configure('Treeview.Heading',font=(None,12))
+style.configure('Treeview', font=(None,10))
+
+
+######################
+
 W = 1200
 H = 600
 MW = GUI.winfo_screenwidth() # Monitor Width
@@ -191,7 +199,7 @@ for i,(k,v) in enumerate(product.items()):
     if column == column_quan:
         column = 0
         row += 1
-
+    # print('K:',k)
     print('IMG:', v['icon'])
     new_icon = PhotoImage(file=v['icon'])
     B = ttk.Button(CF1,text=v['name'],compound='top')
@@ -209,9 +217,11 @@ for i,(k,v) in enumerate(product.items()):
 addproduct.button_list = button_dict
 addproduct.button_frame = CF1
 
+
 # ส่งค่า dict ของปุ่มและเฟรมไปหาหน้าต่างที่ต้องการอัพเดต
 product_icon.button_list = button_dict
 product_icon.button_frame = CF1
+product_icon.function_add = AddMenu
 
 
 print(button_dict)
@@ -306,6 +316,34 @@ def AddTransaction():
 
 B = ttk.Button(FB,text='บันทึก',command=AddTransaction)
 B.pack(ipadx=30,ipady=20)
+
+
+##########Search Menu############
+
+FS1 = Frame(T3)
+FS1.place(x=300,y=30)
+v_search_barcode = StringVar()
+Esearch = ttk.Entry(FS1,textvariable=v_search_barcode,font=(None,25,'bold'))
+Esearch.grid(row=0,column=0,ipadx=25)
+
+def SearchBarcode(event=None):
+    barcode = v_search_barcode.get()
+    try:
+        res = View_product_single(barcode)
+        print(res)
+        pid = res[0]
+        AddMenu(pid)
+    except:
+        messagebox.showwarning('Not Found','สินค้าไม่มีในระบบ')
+        v_search_barcode.set('')
+        Esearch.focus()
+
+
+Esearch.bind('<Return>',SearchBarcode)
+Esearch.bind('<F3>',lambda x: v_search_barcode.set(''))
+
+Bsearch = ttk.Button(FS1,text='ค้นหา',command=SearchBarcode)
+Bsearch.grid(row=0,column=1,ipadx=20,ipady=5,padx=10)
 
 # History New Windows
 
