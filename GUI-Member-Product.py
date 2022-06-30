@@ -24,6 +24,19 @@ def writetocsv(data, filename='data.csv'):
         fw = csv.writer(file) # fw = file writer
         fw.writerow(data)
 
+#############################
+
+import requests
+
+
+def QRImage(price=100,account='0801234567'):
+    url='https://promptpay.io/{}/{:.2f}.png'.format(account,price)
+    response = requests.get(url)
+    if response.status_code == 200:
+        with open('qr-payment.png', 'wb') as f:
+            f.write(response.content)
+
+
 #############GUI##############
 GUI = Tk()
 GUI.title('โปรแกรมจัดการ layout')
@@ -158,22 +171,22 @@ def UpdateTable():
     table.delete(*table.get_children()) # แคลียร์ข้อมูลเก่าในตาราง
     for i,m in enumerate(allmenu.values(),start=1):
         # m = ['ลาเต้', 30, 1, 30]
-        table.insert('','end',value=[ i ,m[0],m[1],m[2],m[3] ] )
+        table.insert('','end',value=[ i ,m[0],m[1],m[2],m[3],m[4]] )
 
 
 def AddMenu(name='latte'):
     # name = 'latte'
     if name not in allmenu:
-        allmenu[name] = [product[name]['name'],product[name]['price'],1,product[name]['price']]
+        allmenu[name] = [product[name]['id'],product[name]['name'],product[name]['price'],1,product[name]['price']]
         
     else:
         # {'latte': ['ลาเต้', 30, 1, 30]}
-        quan = allmenu[name][2] + 1
+        quan = allmenu[name][3] + 1
         total = quan * product[name]['price']
-        allmenu[name] = [product[name]['name'],product[name]['price'], quan ,total]
-    print(allmenu)
+        allmenu[name] = [product[name]['id'],product[name]['name'],product[name]['price'], quan ,total]
+    print('----> ALLMENU:',allmenu)
     # ยอดรวม
-    count = sum([ m[3] for m in allmenu.values()])
+    count = sum([ m[4] for m in allmenu.values()])
     v_total.set('{:,.2f}'.format(count))
     UpdateTable()
 
@@ -259,8 +272,8 @@ B.grid(row=1,column=2,ipadx=20,ipady=10)
 CF2 = Frame(T3)
 CF2.place(x=500,y=100)
 
-header = ['No.', 'title', 'price','quantity','total']
-hwidth = [50,200,100,100,100]
+header = ['No.','ID','title', 'price','quantity','total']
+hwidth = [50,100,200,100,100,100]
 
 table = ttk.Treeview(CF2,columns=header, show='headings',height=15)
 table.pack()
@@ -271,6 +284,87 @@ for hd,hw in zip(header,hwidth):
 
 # for hd in header:
 #     table.heading(hd,text=hd)
+
+
+# Delete Button
+def DeleteProduct(event=None):
+    choice = messagebox.askyesno('ลบรายการ','คุณต้องการลบข้อมูลใช่หรือไม่?')
+    print(choice)
+    if choice == True:
+        select = table.selection() #เลือก item 
+        print(select)
+        if len(select) != 0:
+            data = table.item(select)['values']
+            print(data)
+            del allmenu[data[1]] #ห่างค่าออกมาเป็น string ต้องแปลงเป็น int ก่อน
+            count = sum([ m[4] for m in allmenu.values()]) # update total
+            v_total.set('{:,.2f}'.format(count))
+            UpdateTable()
+            
+        else:
+            messagebox.showwarning('ไม่ได้เลือกรายการ','กรุณาเลือกรายการก่อนลบข้อมูล')
+    else:
+        pass
+
+table.bind('<Delete>',DeleteProduct)
+
+# Update quantity Button
+def UpdateQuantity(event=None):
+    GUIQ = Toplevel()
+    W = 500
+    H = 200
+    MW = GUI.winfo_screenwidth() # Monitor Width
+    MH = GUI.winfo_screenheight() # Monitor Height
+    SX =  (MW/2) - (W/2) # Start X
+    SY =  (MH/2) - (H/2) # Start Y
+    #SY = SY - 50 # diff up
+
+    print(MW,MH,SX,SY)
+    print('{}x{}+{:.0f}+{:.0f}'.format(W,H,SX,SY))
+    GUIQ.geometry('{}x{}+{:.0f}+{:.0f}'.format(W,H,SX,SY))
+    GUIQ.focus_force() # focus ที่หน้าต่างใหม่
+
+    L = Label(GUIQ,text='กรุณากรอกจำนวนสินค้า',font=(None,20)).pack(pady=20)
+    v_newquan = IntVar()
+    v_newquan.set(1)
+    E1 = ttk.Entry(GUIQ,textvariable=v_newquan,font=(None,20))
+    E1.pack()
+    
+    E1.bind('<Up>',lambda x: v_newquan.set(v_newquan.get() + 1))
+    E1.bind('<Down>',lambda x:  v_newquan.set(v_newquan.get() - 1))
+    
+    E1.focus()
+
+    select = table.selection() #เลือก item 
+    print(select)
+    if len(select) != 0:
+        data = table.item(select)['values']
+        print(data)
+        sid = data[1]
+        current_quan = data[4]
+        v_newquan.set(current_quan)
+        
+    else:
+        messagebox.showwarning('ไม่ได้เลือกรายการ','กรุณาเลือกรายการก่อนลบข้อมูล')
+
+    def save_update(event=None):
+        allmenu[sid][3] = v_newquan.get()
+        allmenu[sid][4] = v_newquan.get() * float(allmenu[sid][2]) # * price
+        count = sum([ m[4] for m in allmenu.values()]) # update total
+        v_total.set('{:,.2f}'.format(count))
+        UpdateTable()
+        GUIQ.destroy()
+
+    GUIQ.bind('<Return>',save_update)
+
+    B1 = ttk.Button(GUIQ,text='บันทึก',command=save_update)
+    B1.pack(ipadx=20,ipady=10,pady=10)
+
+    GUIQ.bind('<Escape>',lambda x: GUIQ.destroy())
+    GUIQ.mainloop()
+
+
+table.bind('<F12>',UpdateQuantity)
 
 
 L = Label(T3,text='Total:', font=(None,15)).place(x=500,y=450)
@@ -316,7 +410,71 @@ def AddTransaction():
     Reset() #clear data
 
 
-B = ttk.Button(FB,text='บันทึก',command=AddTransaction)
+def Checkout(event=None):
+    GUICO = Toplevel()
+    W = 500
+    H = 600
+    MW = GUI.winfo_screenwidth() # Monitor Width
+    MH = GUI.winfo_screenheight() # Monitor Height
+    SX =  (MW/2) - (W/2) # Start X
+    SY =  (MH/2) - (H/2) # Start Y
+    #SY = SY - 50 # diff up
+
+    print(MW,MH,SX,SY)
+    print('{}x{}+{:.0f}+{:.0f}'.format(W,H,SX,SY))
+    GUICO.geometry('{}x{}+{:.0f}+{:.0f}'.format(W,H,SX,SY))
+    GUICO.focus_force() # focus ที่หน้าต่างใหม่
+    text = 'ทั้งหมด {} บาท'.format(v_total.get())
+    L = Label(GUICO,text=text,fg='green',font=(None,20)).pack(pady=20)
+
+    v_change = StringVar()
+    L2 = Label(GUICO,textvariable=v_change,fg='orange',font=(None,20)).pack(pady=20)
+    v_change.set('<-----เงินทอน--->')
+
+    v_cash = DoubleVar()
+    v_cash.set(0)
+    E1 = ttk.Entry(GUICO,textvariable=v_cash,font=(None,20))
+    E1.pack()
+    
+    E1.bind('<Up>',lambda x: v_cash.set(v_cash.get() + 100))
+    E1.bind('<Down>',lambda x:  v_cash.set(v_cash.get() - 20))
+    
+    E1.focus()
+
+    global state
+    state = 1
+
+    def save(event=None):
+        global state
+        if state == 1:
+            total = float(v_total.get().replace(',',''))
+            calc = v_cash.get() - total
+            v_change.set('จำนวนเงินทอน: {} บาท'.format(calc))
+            state += 1
+            Bchange.configure(text='บันทึก')
+        elif state == 2:
+            AddTransaction()
+            GUICO.destroy()
+            state = 1
+
+
+    GUICO.bind('<Return>',save)
+
+    Bchange = ttk.Button(GUICO,text='คำนวณเงินทอน',command=save)
+    Bchange.pack(ipadx=20,ipady=10,pady=10)
+
+    total = float(v_total.get().replace(',',''))
+    QRImage(total,account='0801234567')
+
+    img = PhotoImage(file='qr-payment.png')
+    qrcode = Label(GUICO,image=img).pack()
+
+    GUICO.bind('<Escape>',lambda x: GUICO.destroy())
+    GUICO.mainloop()
+
+
+
+B = ttk.Button(FB,text='บันทึก',command=Checkout)
 B.pack(ipadx=30,ipady=20)
 
 
