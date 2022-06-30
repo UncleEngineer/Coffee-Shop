@@ -39,7 +39,7 @@ def QRImage(price=100,account='0801234567'):
 
 #############GUI##############
 GUI = Tk()
-GUI.title('Coffee Shop')
+GUI.title('Coffee Shop by Uncle Engineer')
 GUI.iconbitmap('loong.ico')
 # fullscreen after run
 GUI.state('zoomed')
