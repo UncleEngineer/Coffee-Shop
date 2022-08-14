@@ -39,7 +39,7 @@ def QRImage(price=100,account='0801234567'):
 
 #############GUI##############
 GUI = Tk()
-GUI.title('Coffee Shop by Uncle Engineer')
+GUI.title('Coffee Shop')
 GUI.iconbitmap('loong.ico')
 # fullscreen after run
 GUI.state('zoomed')
@@ -412,8 +412,8 @@ def AddTransaction():
 
 def Checkout(event=None):
     GUICO = Toplevel()
-    W = 500
-    H = 600
+    W = 1000
+    H = 800
     MW = GUI.winfo_screenwidth() # Monitor Width
     MH = GUI.winfo_screenheight() # Monitor Height
     SX =  (MW/2) - (W/2) # Start X
@@ -424,8 +424,24 @@ def Checkout(event=None):
     print('{}x{}+{:.0f}+{:.0f}'.format(W,H,SX,SY))
     GUICO.geometry('{}x{}+{:.0f}+{:.0f}'.format(W,H,SX,SY))
     GUICO.focus_force() # focus ที่หน้าต่างใหม่
-    text = 'ทั้งหมด {} บาท'.format(v_total.get())
-    L = Label(GUICO,text=text,fg='green',font=(None,20)).pack(pady=20)
+
+    global total
+
+    if v_member.get() != 'non-member':
+        discount = float(v_total.get().replace(',','')) * 0.05 # DISCOUNT RATE
+        total = float(v_total.get().replace(',','')) - discount
+    else:
+        discount = 0
+        total = float(v_total.get().replace(',',''))
+
+    text = 'ทั้งหมด {:,.2f} บาท'.format(total)
+    L = Label(GUICO,text=text,fg='green',font=(None,20)).pack(pady=10)
+
+    text = 'ส่วนลด {:,.2f} บาท'.format(discount)
+    L = Label(GUICO,text=text,fg='blue',font=(None,20)).pack(pady=10)
+
+    text = 'ปกติ {} บาท'.format(v_total.get())
+    L = Label(GUICO,text=text,font=(None,15)).pack(pady=10)
 
     v_change = StringVar()
     L2 = Label(GUICO,textvariable=v_change,fg='orange',font=(None,20)).pack(pady=20)
@@ -446,10 +462,11 @@ def Checkout(event=None):
 
     def save(event=None):
         global state
+        global total
         if state == 1:
-            total = float(v_total.get().replace(',',''))
+            total = total
             calc = v_cash.get() - total
-            v_change.set('จำนวนเงินทอน: {} บาท'.format(calc))
+            v_change.set('จำนวนเงินทอน: {:,.2f} บาท'.format(calc))
             state += 1
             Bchange.configure(text='บันทึก')
         elif state == 2:
@@ -463,12 +480,58 @@ def Checkout(event=None):
     Bchange = ttk.Button(GUICO,text='คำนวณเงินทอน',command=save)
     Bchange.pack(ipadx=20,ipady=10,pady=10)
 
-    total = float(v_total.get().replace(',',''))
+    
     QRImage(total,account='0801234567')
 
     img = PhotoImage(file='qr-payment.png')
     qrcode = Label(GUICO,image=img).pack()
 
+
+
+    #############BANKNOTE###############
+    global v_banknote
+    v_banknote = 0
+
+    def Banknote(banktype):
+        global v_banknote
+        v_banknote += banktype # +500
+        print('Current Bank:',v_banknote)
+        v_cash.set(v_banknote)
+
+
+
+    BF = Frame(GUICO)
+    BF.pack(pady=20)
+
+    img_bn1 = PhotoImage(file='b1000.png')
+    BN1 = ttk.Button(BF,image=img_bn1, command=lambda b=1000: Banknote(b))
+    BN1.grid(row=0,column=0)
+
+    img_bn2 = PhotoImage(file='b500.png')
+    BN2 = ttk.Button(BF,image=img_bn2, command=lambda b=500: Banknote(b))
+    BN2.grid(row=0,column=1)
+
+    img_bn3 = PhotoImage(file='b100.png')
+    BN3 = ttk.Button(BF,image=img_bn3, command=lambda b=100: Banknote(b))
+    BN3.grid(row=0,column=2)
+
+    img_bn4 = PhotoImage(file='b50.png')
+    BN4 = ttk.Button(BF,image=img_bn4, command=lambda b=50: Banknote(b))
+    BN4.grid(row=0,column=3)
+
+    img_bn5 = PhotoImage(file='b20.png')
+    BN5 = ttk.Button(BF,image=img_bn5, command=lambda b=20: Banknote(b))
+    BN5.grid(row=0,column=4)
+
+
+    L = ttk.Label(GUICO, text='* กดปุ่ม F12 เพื่อเคลียร์จำนวนเงิน').pack()
+
+    def clear_banknote(event):
+        global v_banknote
+        v_banknote = 0
+        v_cash.set(0)
+
+    GUICO.bind('<F12>', clear_banknote)
     GUICO.bind('<Escape>',lambda x: GUICO.destroy())
     GUICO.mainloop()
 
@@ -476,6 +539,69 @@ def Checkout(event=None):
 
 B = ttk.Button(FB,text='บันทึก',command=Checkout)
 B.pack(ipadx=30,ipady=20)
+
+
+v_member = StringVar()
+v_member.set('non-member')
+
+LM = ttk.Label(T3,textvariable=v_member,font=(None,20))
+LM.place(x=820,y=560)
+LM.configure(foreground='red')
+
+def set_member():
+    GUIM = Toplevel()
+    W = 400
+    H = 200
+    MW = GUI.winfo_screenwidth() # Monitor Width
+    MH = GUI.winfo_screenheight() # Monitor Height
+    SX =  (MW/2) - (W/2) # Start X
+    SY =  (MH/2) - (H/2) # Start Y
+
+    GUIM.geometry('{}x{}+{:.0f}+{:.0f}'.format(W,H,SX,SY))
+    GUIM.focus_force() # focus ที่หน้าต่างใหม่
+    
+    L = ttk.Label(GUIM,text='Member Mobile No.')
+    L.pack(pady=20)
+
+    v_member.set('')
+    EMember = ttk.Entry(GUIM,textvariable=v_member,font=(None,20))
+    EMember.pack()
+    EMember.focus()
+
+    def Check(event=None):
+        print(v_member.get())
+        c = CheckMember(v_member.get())
+        if c == True:
+            v_member.set(v_member.get())
+            LM.configure(foreground='green')
+            GUIM.destroy()
+        else:
+            v_member.set('non-member')
+            LM.configure(foreground='red')
+
+
+    B = ttk.Button(GUIM,text='Check',command=Check)
+    B.pack(pady=20)
+
+    GUIM.bind('<Return>',Check)
+
+    def close_window(event=None):
+        v_member.set('non-member')
+        GUIM.destroy()
+        LM.configure(foreground='red')
+
+    GUIM.protocol('WM_DELETE_WINDOW',close_window)
+
+    GUIM.mainloop()
+
+
+
+img_member = PhotoImage(file='member.png')
+Bmember = ttk.Button(T3, image=img_member,command=set_member)
+Bmember.place(x=750,y=550)
+
+
+
 
 
 ##########Search Menu############
