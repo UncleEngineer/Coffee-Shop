@@ -24,7 +24,9 @@ def writetocsv(data, filename='data.csv'):
         fw = csv.writer(file) # fw = file writer
         fw.writerow(data)
 
-#############################
+###############BILL##############
+from bill import PrintBill
+#################################
 
 import requests
 
@@ -184,6 +186,7 @@ def AddMenu(name='latte'):
         quan = allmenu[name][3] + 1
         total = quan * product[name]['price']
         allmenu[name] = [product[name]['id'],product[name]['name'],product[name]['price'], quan ,total]
+    
     print('----> ALLMENU:',allmenu)
     # ยอดรวม
     count = sum([ m[4] for m in allmenu.values()])
@@ -470,6 +473,15 @@ def Checkout(event=None):
             state += 1
             Bchange.configure(text='บันทึก')
         elif state == 2:
+            ##########BILL########
+            printout = []
+            for m in allmenu.values():
+                printout.append(m[1:]) # ['A',50,1,50]
+
+            stamp = datetime.now().strftime('%Y-%m-%d %H:%M')
+            transaction = v_transaction.get()
+            PrintBill(printout,False,True,transaction=transaction,timestamp=stamp)
+            ######################
             AddTransaction()
             GUICO.destroy()
             state = 1
